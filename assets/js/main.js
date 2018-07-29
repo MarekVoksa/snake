@@ -49,28 +49,76 @@ function resizeBoard() {
 
 /* Cell prototype, snake object */
 
-function Cell(x, y, type) {
-  this.x = x;
-  this.y = z;
-  this.type = type;
-}
-
 const snake = {
   x: 10,
   y: 10,
   ate: false,
   length: 4,
-  cells: []
+  direction: "up",
+  cells: [],
+  containsCell: function (x, y) {
+    for (cell of snake.cells) {
+      if (x === cell.x && y === cell.y) {return true;}
+    }
+    return false;
+  }
 };
 
-/* Generate snake */
+function Cell(x, y, type) {
+  this.x = x;
+  this.y = y;
+  this.type = type;
+}
 
-/* onKeyDown function */
+/* Generate snake cells */
+
+for (i = 0; i < snake.length; i++) {
+  let cell = new Cell(snake.x, snake.y + i, 'snake')
+  snake.cells.push(cell)
+}
+
+/* Random coordinate fucntion */
+
+function randomXY() {
+  return(Math.floor(Math.random() * (v.w + 1)));
+}
+
+/* Food prototype */
+
+function Food() {
+  let x;
+  let y;
+
+  do {
+    x = randomXY();
+    y = randomXY();
+  } while (snake.containsCell(x, y))
+
+  return(new Cell(x, y, 'food'))
+}
+
+let food = new Food();
 
 /* Move function */
 
+
+/* onKeyDown function */
+
+
 /* onFoodPickup function */
 
-/* Init game */
+
+
+/* Render function */
+
+function render() {
+  for (cell of snake.cells) {
+    document.querySelector('.cell[data-x="' + cell.x + '"][data-y="' + cell.y + '"]').className = "cell cell-snake";
+  }
+
+  document.querySelector('.cell[data-x="' + food.x + '"][data-y="' + food.y + '"]').className = "cell cell-food";
+}
+
+render();
 
 /* Main loop */

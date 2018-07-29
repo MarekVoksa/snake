@@ -35,6 +35,10 @@ main, .left-pane {
   float: left;
 }
 
-.snake {
+.cell-snake {
+  background: red;
+}
 
+.cell-food {
+  background: green;
 }
