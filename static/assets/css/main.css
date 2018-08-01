@@ -1,4 +1,4 @@
-* {margin: 0; padding: 0; box-sizing: border-box;}
+* {margin: 0; padding: 0; box-sizing: border-box; font-family: 'Eczar', serif; color: white}
 
 html, body, main {
   width: 100%;
@@ -36,9 +36,28 @@ main, .left-pane {
 }
 
 .cell-snake {
-  background: red;
+  background-image: repeating-linear-gradient(
+      45deg,
+      #88e829,
+      #88e829 3px,
+      #35b717 3px,
+      #35b717 6px
+    );;
 }
 
 .cell-food {
-  background: green;
+  background: radial-gradient(circle at center, red 67%, transparent 70%);
+}
+
+.display-score, .display-tick {
+  width: 100%;
+  text-align: center;
+}
+
+.display-score {
+  padding: 30px 0 0 0;
+}
+
+.score, .tick {
+  font-size: 40px;
 }
