@@ -10,12 +10,18 @@ let g = {
 let mainLoop;
 let food;
 
-/* Generate game board */
-
 const $game = document.querySelector('.game'),
   $score = document.querySelector('.score'),
   $tick = document.querySelector('.tick'),
-  $overlay = document.querySelector('.overlay');
+  $overlay = document.querySelector('.overlay'),
+  controls = {
+    $up: document.querySelector('.controls-up'),
+    $down: document.querySelector('.controls-down'),
+    $left: document.querySelector('.controls-left'),
+    $right: document.querySelector('.controls-right')
+  };
+
+/* Generate game board */
 
 for (y = 0; y < (g.w + 1); y++) {
   for (x = 0; x < (g.w + 1); x++) {
@@ -64,8 +70,8 @@ function Cell(x, y, type) {
 /* Snake object */
 
 const snake = {
-  x: 10,
-  y: 10,
+  x: g.w / 2,
+  y: g.w / 2,
   ate: false,
   length: null,
   direction: 'up',
@@ -181,8 +187,71 @@ function mainFunction() {
 /* Start game */
 
 function resetAndStartGame() {
+  window.onkeydown = function (e) {
+    switch (e.key) {
+      case "ArrowUp":
+      case "w":
+        lightUpButton('up');
+        snake.direction = (snake.direction === 'down' ? 'down' : 'up');
+        break;
+      case "ArrowDown":
+      case "s":
+        lightUpButton('down');
+        snake.direction = (snake.direction === 'up' ? 'up' : 'down');
+        break;
+      case "ArrowLeft":
+      case "a":
+        lightUpButton('left');
+        snake.direction = (snake.direction === 'right' ? 'right' : 'left');
+        break;
+      case "ArrowRight":
+      case "d":
+        lightUpButton('right');
+        snake.direction = (snake.direction === 'left' ? 'left' : 'right');
+        break;
+      case "PageUp":
+        changeGameTick(10);
+        break;
+      case "PageDown":
+        changeGameTick(-10);
+        break;
+    }
+  };
+  window.onkeyup = function (e) {
+    switch (e.key) {
+      case "ArrowUp":
+      case "w":
+        resetButton('up');
+        break;
+      case "ArrowDown":
+      case "s":
+        resetButton('down');
+        break;
+      case "ArrowLeft":
+      case "a":
+        resetButton('left');
+        break;
+      case "ArrowRight":
+      case "d":
+        resetButton('right');
+        break;
+    }
+  };
+
+  for ($cell of document.querySelectorAll('.cell')) {
+    $cell.className = 'cell';
+  }
+
+  $overlay.onclick = null;
+  $overlay.style.display = "none";
+  $overlay.innerHTML = "Press any button or click here to start game.";
+
   g.started = true;
   g.score = 0;
+
+  snake.direction = 'up';
+  snake.x = g.w / 2;
+  snake.y = g.w / 2;
   snake.generate(4);
   mainLoop = setInterval(mainFunction, g.tick);
 }
@@ -191,9 +260,8 @@ function resetAndStartGame() {
 
 function stopGame() {
   clearInterval(mainLoop);
-  g.started = false;
-  $overlay.innerHTML = "GAME OVER";
-  $overlay.style.display = "block";
+  $overlay.innerHTML = "<h2>GAME OVER</h2><div class='button-reset' onclick='resetAndStartGame()'>Try Again</div>";
+  $overlay.style.display = "flex";
 }
 
 /* Init */
@@ -202,29 +270,49 @@ render();
 
 if (!g.started) {
   window.onkeydown = function () {
-    window.onkeydown = function (e) {
-      switch (e.key) {
-        case "ArrowUp":
-        case "w":
-          snake.direction = 'up';
-          break;
-        case "ArrowDown":
-        case "s":
-          snake.direction = 'down';
-          break;
-        case "ArrowLeft":
-        case "a":
-          snake.direction = 'left';
-          break;
-        case "ArrowRight":
-        case "d":
-          snake.direction = 'right';
-          break;
-      }
-    };
-
-    $overlay.style.display = "none";
-
     resetAndStartGame();
+  };
+
+  $overlay.onclick = function () {
+    resetAndStartGame();
+  };
+}
+
+/* UI Direction buttons */
+
+function lightUpButton(direction) {
+  let $button = document.querySelector('.controls-' + direction);
+  $button.style.background = "#71e067";
+}
+
+function resetButton(direction) {
+  let $button = document.querySelector('.controls-' + direction);
+  $button.style.background = "white";
+}
+
+function pressButton($button) {
+  $button.style.background = "#71e067";
+  setTimeout(function () {$button.style.background = "white";}, 100);
+  switch ($button.className) {
+    case "controls-button controls-up":
+      snake.direction = (snake.direction === 'down' ? 'down' : 'up');
+      break;
+    case "controls-button controls-down":
+      snake.direction = (snake.direction === 'up' ? 'up' : 'down');
+      break;
+    case "controls-button controls-left":
+      snake.direction = (snake.direction === 'right' ? 'right' : 'left');
+      break;
+    case "controls-button controls-right":
+      snake.direction = (snake.direction === 'left' ? 'left' : 'right');
+      break;
   }
+}
+
+function changeGameTick(add) {
+  g.tick += add;
+
+  clearInterval(mainLoop);
+
+  mainLoop = setInterval(mainFunction, g.tick);
 }
