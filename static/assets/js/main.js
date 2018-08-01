@@ -4,7 +4,8 @@
 let g = {
   w: 20,
   tick: 100,
-  score: 0
+  score: 0,
+  started: false
 };
 let mainLoop;
 let food;
@@ -13,7 +14,8 @@ let food;
 
 const $game = document.querySelector('.game'),
   $score = document.querySelector('.score'),
-  $tick = document.querySelector('.tick');
+  $tick = document.querySelector('.tick'),
+  $overlay = document.querySelector('.overlay');
 
 for (y = 0; y < (g.w + 1); y++) {
   for (x = 0; x < (g.w + 1); x++) {
@@ -65,10 +67,18 @@ const snake = {
   x: 10,
   y: 10,
   ate: false,
-  length: 4,
+  length: null,
   direction: 'up',
-  cells: [],
+  cells: null,
   toRemove: null,
+  generate: function (length) {
+    this.length = length;
+    this.cells = [];
+    for (i = 0; i < this.length; i++) {
+      let cell = new Cell(this.x, this.y + i, 'snake')
+      this.cells.push(cell)
+    }
+  },
   containsCell: function (x, y) {
     for (cell of this.cells) {
       if (x === cell.x && y === cell.y) {return true;}
@@ -88,7 +98,7 @@ const snake = {
     this.ate = (this.x === food.x && this.y === food.y ? true : false);
 
     if (!this.ate) {
-      this.toRemove = snake.cells.pop();
+      this.toRemove = this.cells.pop();
     } else {
       food = new Food;
       this.length++;
@@ -100,13 +110,15 @@ const snake = {
 
     if (this.y < 0 || this.y > g.w) {return true;}
 
-    for (i = 1; i < snake.cells.length; i++) {
-      if (this.x === snake.cells[i].x && this.y === snake.cells[i].y) {return true;}
+    for (i = 1; i < this.cells.length; i++) {
+      if (this.x === this.cells[i].x && this.y === this.cells[i].y) {return true;}
     }
 
     return false;
   }
 };
+
+snake.generate(4);
 
 /* Food prototype */
 
@@ -124,43 +136,11 @@ function Food() {
 
 food = new Food();
 
-/* Generate snake cells */
-
-for (i = 0; i < snake.length; i++) {
-  let cell = new Cell(snake.x, snake.y + i, 'snake')
-  snake.cells.push(cell)
-}
-
 /* Random coordinate fucntion */
 
 function randomXY() {
   return(Math.floor(Math.random() * (g.w + 1)));
 }
-
-/* onKeyDown function */
-
-window.onkeydown = function (e) {
-  switch (e.key) {
-    case "ArrowUp":
-    case "w":
-      snake.direction = 'up';
-      break;
-    case "ArrowDown":
-    case "s":
-      snake.direction = 'down';
-      break;
-    case "ArrowLeft":
-    case "a":
-      snake.direction = 'left';
-      break;
-    case "ArrowRight":
-    case "d":
-      snake.direction = 'right';
-      break;
-    default:
-      break;
-  }
-};
 
 /* Find and update cell class */
 
@@ -189,8 +169,6 @@ function render() {
 
 /* Main loop */
 
-mainLoop = setInterval(mainFunction, g.tick);
-
 function mainFunction() {
 
   snake.move();
@@ -200,8 +178,53 @@ function mainFunction() {
 
 };
 
-/* Stop game function */
+/* Start game */
+
+function resetAndStartGame() {
+  g.started = true;
+  g.score = 0;
+  snake.generate(4);
+  mainLoop = setInterval(mainFunction, g.tick);
+}
+
+/* Stop game */
 
 function stopGame() {
   clearInterval(mainLoop);
+  g.started = false;
+  $overlay.innerHTML = "GAME OVER";
+  $overlay.style.display = "block";
+}
+
+/* Init */
+
+render();
+
+if (!g.started) {
+  window.onkeydown = function () {
+    window.onkeydown = function (e) {
+      switch (e.key) {
+        case "ArrowUp":
+        case "w":
+          snake.direction = 'up';
+          break;
+        case "ArrowDown":
+        case "s":
+          snake.direction = 'down';
+          break;
+        case "ArrowLeft":
+        case "a":
+          snake.direction = 'left';
+          break;
+        case "ArrowRight":
+        case "d":
+          snake.direction = 'right';
+          break;
+      }
+    };
+
+    $overlay.style.display = "none";
+
+    resetAndStartGame();
+  }
 }
