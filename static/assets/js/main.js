@@ -125,6 +125,9 @@ const snake = {
 };
 
 snake.generate(4);
+for (cell of snake.cells) {
+  updateCell(cell.x, cell.y, 'cell cell-snake');
+}
 
 /* Food prototype */
 
@@ -157,15 +160,17 @@ function updateCell(x, y, className) {
 /* Render function */
 
 function render() {
-  for (cell of snake.cells) {
-    updateCell(cell.x, cell.y, 'cell cell-snake');
-  }
+  if (g.started) {
+    for (cell of snake.cells) {
+      updateCell(cell.x, cell.y, 'cell cell-snake');
+    }
 
-  if (snake.toRemove) {
-    updateCell(snake.toRemove.x, snake.toRemove.y, 'cell');
-  }
+    if (snake.toRemove) {
+      updateCell(snake.toRemove.x, snake.toRemove.y, 'cell');
+    }
 
-  updateCell(food.x, food.y, 'cell cell-food');
+    updateCell(food.x, food.y, 'cell cell-food');
+  }
 
   /* Display to UI */
 
@@ -259,6 +264,7 @@ function resetAndStartGame() {
 /* Stop game */
 
 function stopGame() {
+  g.started = false;
   clearInterval(mainLoop);
   $overlay.innerHTML = "<h2>GAME OVER</h2><div class='button-reset' onclick='resetAndStartGame()'>Try Again</div>";
   $overlay.style.display = "flex";
