@@ -8,6 +8,7 @@
   <meta name="author" content="Marek Voksa">
   <link rel="stylesheet" href="static/assets/css/main.css">
   <link href="https://fonts.googleapis.com/css?family=Eczar" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
 </head>
 <body>
   <main>
@@ -23,19 +24,33 @@
       <div class="display-tick">
         <h2>Game tick: </h2>
         <div class="tick"></div>
-        <p>Increase or decrease with PgUp and PgDown.</p>
+        <span class="change-tick">
+          <i class="fa fa-plus-square" onclick="game.changeGameTick(10);"></i>
+          <i class="fa fa-minus-square" onclick="game.changeGameTick(-10);"></i>
+        </span>
+        <div class="text">You can also increase or decrease game tick with PgUp and PgDown.</div>
+      </div>
+      <div class="display-wrap">
+        <form>
+          <label for="wrap">
+            <span>
+              <i id="wrap-icon" class="fa fa-plus-square">&nbsp; Wrap edges</i>
+            </span>
+          </label>
+          <input id="wrap" type="checkbox" onclick="handleGameWrapInput()""/>
+        </form>
       </div>
       <div class="controls">
-        <div class="controls-button controls-up" onclick="pressButton(this)">
+        <div class="controls-button controls-up" onclick="game.pressButton(this)">
           <div class="controls-text">🠉 / W</div>
         </div>
-        <div class="controls-button controls-left" onclick="pressButton(this)">
+        <div class="controls-button controls-left" onclick="game.pressButton(this)">
           <div class="controls-text">🠈 / A</div>
         </div>
-        <div class="controls-button controls-right" onclick="pressButton(this)">
+        <div class="controls-button controls-right" onclick="game.pressButton(this)">
           <div class="controls-text">🠊 / D</div>
         </div>
-        <div class="controls-button controls-down" onclick="pressButton(this)">
+        <div class="controls-button controls-down" onclick="game.pressButton(this)">
           <div class="controls-text">🠋 / S</div>
         </div>
       </div>

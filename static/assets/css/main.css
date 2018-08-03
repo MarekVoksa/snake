@@ -18,7 +18,7 @@ main, .left-pane {
 }
 
 .right-pane {
-  flex-grow: 1;
+  width: 35%;
   height: 100%;
   background: grey;
 }
@@ -51,9 +51,17 @@ main, .left-pane {
   background: radial-gradient(circle at center, red 67%, transparent 70%);
 }
 
-.display-score, .display-tick {
+.display-score, .display-tick, .display-wrap {
   width: 100%;
   text-align: center;
+}
+
+.display-tick {
+  padding: 20px 0;
+}
+
+.tick {
+  line-height: 1.2em;
 }
 
 .display-score {
@@ -127,9 +135,29 @@ main, .left-pane {
 
 .button-reset {
   width: 200px;
-  height: 50px;
-  padding: 0;
+  padding: 5px;
   margin-top: 20px;
+  line-height: 1.5em;
   background: white;
   color: black;
+}
+
+.display-wrap span {
+  font-size: 30px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.display-wrap input {
+  display: none;
+}
+
+.change-tick i {
+  font-size: 30px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.change-tick i:first-child {
+  margin-right: 20px;
 }

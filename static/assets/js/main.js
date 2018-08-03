@@ -1,19 +1,14 @@
 
-/* Initial variables */
+/* Author: Marek Voksa */
 
-let g = {
-  w: 20,
-  tick: 100,
-  score: 0,
-  started: false
-};
-let mainLoop;
-let food;
-
-const $game = document.querySelector('.game'),
+const
+  $game = document.querySelector('.game'),
+  $overlay = document.querySelector('.overlay'),
   $score = document.querySelector('.score'),
   $tick = document.querySelector('.tick'),
-  $overlay = document.querySelector('.overlay'),
+  $wrapIcon = document.getElementById('wrap-icon'),
+
+  cells = document.getElementsByClassName('cell'),
   controls = {
     $up: document.querySelector('.controls-up'),
     $down: document.querySelector('.controls-down'),
@@ -21,304 +16,515 @@ const $game = document.querySelector('.game'),
     $right: document.querySelector('.controls-right')
   };
 
-/* Generate game board */
-
-for (y = 0; y < (g.w + 1); y++) {
-  for (x = 0; x < (g.w + 1); x++) {
-    let $div = document.createElement('div');
-    $div.setAttribute('class', 'cell');
-    $div.setAttribute('data-x', x);
-    $div.setAttribute('data-y', y);
-    $game.appendChild($div);
-  }
-}
-
-const cells = document.getElementsByClassName('cell');
-
-/* Gameboard dimensions */
-
-resizeBoard();
-
-window.addEventListener("resize", resizeBoard);
-
-function resizeBoard() {
-  let dw = window.innerWidth,
-      dh = window.innerHeight,
-      gw = ((dw * 0.65) < dh ? (dw * 0.65) : dh);
-
-  gw = (Math.floor(gw) - 20);
-
-  $game.style.maxWidth = gw + "px";
-  $game.style.maxHeight = gw + "px";
-
-  let cw = gw / (g.w + 1);
-
-  for ($cell of cells) {
-    $cell.style.width = cw + "px";
-    $cell.style.height = cw + "px";
-  }
-}
+let food;
 
 /* Cell prototype */
 
 function Cell(x, y, type) {
+
   this.x = x;
   this.y = y;
+
   this.type = type;
-}
 
-/* Snake object */
-
-const snake = {
-  x: g.w / 2,
-  y: g.w / 2,
-  ate: false,
-  length: null,
-  direction: 'up',
-  cells: null,
-  toRemove: null,
-  generate: function (length) {
-    this.length = length;
-    this.cells = [];
-    for (i = 0; i < this.length; i++) {
-      let cell = new Cell(this.x, this.y + i, 'snake')
-      this.cells.push(cell)
-    }
-  },
-  containsCell: function (x, y) {
-    for (cell of this.cells) {
-      if (x === cell.x && y === cell.y) {return true;}
-    }
-    return false;
-  },
-  move: function () {
-    switch (this.direction) {
-      case 'up': {this.y--; break;}
-      case 'down': {this.y++; break;}
-      case 'left': {this.x--; break;}
-      case 'right': {this.x++; break;}
-    }
-
-    this.cells.unshift(new Cell(this.x, this.y, 'snake'));
-
-    this.ate = (this.x === food.x && this.y === food.y ? true : false);
-
-    if (!this.ate) {
-      this.toRemove = this.cells.pop();
-    } else {
-      food = new Food;
-      this.length++;
-      g.score += 10;
-    }
-  },
-  checkForCollision: function () {
-    if (this.x < 0 || this.x > g.w) {return true;}
-
-    if (this.y < 0 || this.y > g.w) {return true;}
-
-    for (i = 1; i < this.cells.length; i++) {
-      if (this.x === this.cells[i].x && this.y === this.cells[i].y) {return true;}
-    }
-
-    return false;
-  }
-};
-
-snake.generate(4);
-for (cell of snake.cells) {
-  updateCell(cell.x, cell.y, 'cell cell-snake');
 }
 
 /* Food prototype */
 
 function Food() {
-  let x;
-  let y;
+
+  let
+    x,
+    y;
 
   do {
-    x = randomXY();
-    y = randomXY();
-  } while (snake.containsCell(x, y))
 
-  return(new Cell(x, y, 'food'))
+    x = game.randomXY();
+    y = game.randomXY();
+
+  } while ( snake.containsCell(x, y) )
+
+  return(new Cell(x, y, 'food'));
+
 }
 
-food = new Food();
+function listenForInput() {
 
-/* Random coordinate fucntion */
-
-function randomXY() {
-  return(Math.floor(Math.random() * (g.w + 1)));
-}
-
-/* Find and update cell class */
-
-function updateCell(x, y, className) {
-  document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]').className = className;
-}
-
-/* Render function */
-
-function render() {
-  if (g.started) {
-    for (cell of snake.cells) {
-      updateCell(cell.x, cell.y, 'cell cell-snake');
-    }
-
-    if (snake.toRemove) {
-      updateCell(snake.toRemove.x, snake.toRemove.y, 'cell');
-    }
-
-    updateCell(food.x, food.y, 'cell cell-food');
-  }
-
-  /* Display to UI */
-
-  $score.innerHTML = g.score;
-  $tick.innerHTML = g.tick + " ms";
-}
-
-/* Main loop */
-
-function mainFunction() {
-
-  snake.move();
-  if (snake.checkForCollision()) {stopGame();}
-
-  render();
-
-};
-
-/* Start game */
-
-function resetAndStartGame() {
-  window.onkeydown = function (e) {
-    switch (e.key) {
-      case "ArrowUp":
-      case "w":
-        lightUpButton('up');
-        snake.direction = (snake.direction === 'down' ? 'down' : 'up');
-        break;
-      case "ArrowDown":
-      case "s":
-        lightUpButton('down');
-        snake.direction = (snake.direction === 'up' ? 'up' : 'down');
-        break;
-      case "ArrowLeft":
-      case "a":
-        lightUpButton('left');
-        snake.direction = (snake.direction === 'right' ? 'right' : 'left');
-        break;
-      case "ArrowRight":
-      case "d":
-        lightUpButton('right');
-        snake.direction = (snake.direction === 'left' ? 'left' : 'right');
-        break;
-      case "PageUp":
-        changeGameTick(10);
-        break;
-      case "PageDown":
-        changeGameTick(-10);
-        break;
-    }
-  };
-  window.onkeyup = function (e) {
-    switch (e.key) {
-      case "ArrowUp":
-      case "w":
-        resetButton('up');
-        break;
-      case "ArrowDown":
-      case "s":
-        resetButton('down');
-        break;
-      case "ArrowLeft":
-      case "a":
-        resetButton('left');
-        break;
-      case "ArrowRight":
-      case "d":
-        resetButton('right');
-        break;
-    }
-  };
-
-  for ($cell of document.querySelectorAll('.cell')) {
-    $cell.className = 'cell';
-  }
-
-  $overlay.onclick = null;
-  $overlay.style.display = "none";
-  $overlay.innerHTML = "Press any button or click here to start game.";
-
-  g.started = true;
-  g.score = 0;
-
-  snake.direction = 'up';
-  snake.x = g.w / 2;
-  snake.y = g.w / 2;
-  snake.generate(4);
-  mainLoop = setInterval(mainFunction, g.tick);
-}
-
-/* Stop game */
-
-function stopGame() {
-  g.started = false;
-  clearInterval(mainLoop);
-  $overlay.innerHTML = "<h2>GAME OVER</h2><div class='button-reset' onclick='resetAndStartGame()'>Try Again</div>";
-  $overlay.style.display = "flex";
-}
-
-/* Init */
-
-render();
-
-if (!g.started) {
   window.onkeydown = function () {
-    resetAndStartGame();
+
+    game.resetAndStartGame();
+
   };
 
   $overlay.onclick = function () {
-    resetAndStartGame();
+
+    game.resetAndStartGame();
+
   };
+
 }
 
-/* UI Direction buttons */
+function handleGameWrapInput() {
 
-function lightUpButton(direction) {
-  let $button = document.querySelector('.controls-' + direction);
-  $button.style.background = "#71e067";
-}
+  if ( ! game.wrapActive ) {
 
-function resetButton(direction) {
-  let $button = document.querySelector('.controls-' + direction);
-  $button.style.background = "white";
-}
+    $wrapIcon.className = "fa fa-minus-square";
 
-function pressButton($button) {
-  $button.style.background = "#71e067";
-  setTimeout(function () {$button.style.background = "white";}, 100);
-  switch ($button.className) {
-    case "controls-button controls-up":
-      snake.direction = (snake.direction === 'down' ? 'down' : 'up');
-      break;
-    case "controls-button controls-down":
-      snake.direction = (snake.direction === 'up' ? 'up' : 'down');
-      break;
-    case "controls-button controls-left":
-      snake.direction = (snake.direction === 'right' ? 'right' : 'left');
-      break;
-    case "controls-button controls-right":
-      snake.direction = (snake.direction === 'left' ? 'left' : 'right');
-      break;
+    game.wrapActive = true;
+
+  } else {
+
+    $wrapIcon.className = "fa fa-plus-square";
+
+    game.wrapActive = false;
+
   }
+
 }
 
-function changeGameTick(add) {
-  g.tick += add;
+/* Game object */
 
-  clearInterval(mainLoop);
+const game = {
 
-  mainLoop = setInterval(mainFunction, g.tick);
+  mainLoop: null,
+  score: 0,
+  started: false,
+  tick: 100,
+  width: 20,
+  wrapActive: false,
+
+  changeGameTick: (add) => {
+
+    game.tick += add;
+    UI.renderStats();
+
+    if ( game.started ) {
+
+      clearInterval(game.mainLoop);
+
+      game.mainLoop = setInterval(game.mainFunction, game.tick);
+
+    }
+
+  },
+
+  generateBoard: () => {
+
+    for ( y = 0; y < (game.width + 1); y++ ) {
+
+      for ( x = 0; x < (game.width + 1); x++ ) {
+
+        let $div = document.createElement('div');
+
+        $div.setAttribute('class', 'cell');
+        $div.setAttribute('data-x', x);
+        $div.setAttribute('data-y', y);
+
+        $game.appendChild($div);
+
+      }
+
+    }
+
+  },
+
+  mainFunction: () => {
+
+    snake.moveSnake();
+    snake.changedDirection = false;
+
+    if ( snake.checkForCollision() ) { game.stopGame(); }
+
+    game.renderGame();
+
+  },
+
+  randomXY: () => {
+
+    return(Math.floor(Math.random() * ( game.width + 1 )));
+
+  },
+
+  renderGame: () => {
+
+    for ( cell of snake.cells ) {
+
+      game.updateCell(cell.x, cell.y, 'cell cell-snake');
+
+    }
+
+    if ( snake.toRemove ) {
+
+      game.updateCell(snake.toRemove.x, snake.toRemove.y, 'cell');
+
+    }
+
+    game.updateCell(food.x, food.y, 'cell cell-food');
+
+    /* Display to UI */
+
+    UI.renderStats();
+
+  },
+
+  resizeBoard: () => {
+
+    let
+      dw = window.innerWidth,
+      dh = window.innerHeight,
+      gw = ( ( dw * 0.65 ) < dh ? ( dw * 0.65 ) : dh );
+
+    gw = ( Math.floor(gw) - 20 );
+
+    $game.style.maxWidth = gw + "px";
+    $game.style.maxHeight = gw + "px";
+
+    let cw = gw / ( game.width + 1 );
+
+    for ( $cell of cells ) {
+
+      $cell.style.width = cw + "px";
+      $cell.style.height = cw + "px";
+
+    }
+
+  },
+
+  resetAndStartGame: () => {
+
+    window.onkeydown = function (e) {
+
+      switch ( e.key ) {
+
+        case "ArrowUp":
+        case "w":
+
+          UI.lightUpButton('up');
+
+          snake.changeDirection('up');
+
+          break;
+
+        case "ArrowDown":
+        case "s":
+
+          UI.lightUpButton('down');
+
+          snake.changeDirection('down');
+
+          break;
+
+        case "ArrowLeft":
+        case "a":
+
+          UI.lightUpButton('left');
+
+          snake.changeDirection('left');
+
+          break;
+
+        case "ArrowRight":
+        case "d":
+
+          UI.lightUpButton('right');
+
+          snake.changeDirection('right');
+
+          break;
+
+        case "PageUp":
+
+          game.changeGameTick(10);
+
+          break;
+
+        case "PageDown":
+
+          game.changeGameTick(-10);
+
+          break;
+
+      }
+
+    };
+
+    window.onkeyup = function (e) {
+
+      switch (e.key) {
+
+        case "ArrowUp":
+        case "w":
+
+          UI.resetButton('up');
+
+          break;
+
+        case "ArrowDown":
+        case "s":
+
+          UI.resetButton('down');
+
+          break;
+
+        case "ArrowLeft":
+        case "a":
+
+          UI.resetButton('left');
+
+          break;
+
+        case "ArrowRight":
+        case "d":
+
+          UI.resetButton('right');
+
+          break;
+
+      }
+
+    };
+
+    for ( $cell of document.querySelectorAll('.cell') ) {
+
+      $cell.className = 'cell';
+
+    }
+
+    $overlay.onclick = null;
+    $overlay.style.display = "none";
+    $overlay.innerHTML = "Press any button or click here to start game.";
+
+    game.started = true;
+    game.score = 0;
+
+    snake.direction = 'up';
+    snake.x = game.width / 2;
+    snake.y = game.width / 2;
+    snake.generateSnake(4);
+
+    game.mainLoop = setInterval(game.mainFunction, game.tick);
+
+  },
+
+  stopGame: () => {
+
+    game.started = false;
+
+    clearInterval(game.mainLoop);
+
+    $overlay.innerHTML = "<h2>GAME OVER</h2><p>Press any button or click here to try again.</p>";
+    $overlay.style.display = "flex";
+
+    setTimeout(listenForInput, 300);
+
+  },
+
+  updateCell: (x, y, className) => {
+
+    let $cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]');
+
+    if ( $cell ) {
+
+      $cell.className = className;
+
+    }
+
+  }
+
+};
+
+/* UI object */
+
+const UI = {
+
+  lightUpButton: (direction) => {
+
+    let $button = document.querySelector('.controls-' + direction);
+
+    $button.style.background = "#71e067";
+
+  },
+
+  pressButton: ($button) => {
+
+    $button.style.background = "#71e067";
+
+    setTimeout(() => { $button.style.background = "white"; }, 100);
+
+    switch ( $button.className ) {
+
+      case "controls-button controls-up":
+
+        snake.direction = ( snake.direction === 'down' ? 'down' : 'up' );
+
+        break;
+
+      case "controls-button controls-down":
+
+        snake.direction = ( snake.direction === 'up' ? 'up' : 'down' );
+
+        break;
+
+      case "controls-button controls-left":
+
+        snake.direction = ( snake.direction === 'right' ? 'right' : 'left' );
+
+        break;
+
+      case "controls-button controls-right":
+
+        snake.direction = ( snake.direction === 'left' ? 'left' : 'right' );
+
+        break;
+
+    }
+
+  },
+
+  renderStats: () => {
+
+    $score.innerHTML = game.score;
+
+    $tick.innerHTML = game.tick + " ms";
+
+  },
+
+  resetButton: (direction) => {
+
+    let $button = document.querySelector('.controls-' + direction);
+
+    $button.style.background = "white";
+
+  },
+
+}
+
+/* Snake object */
+
+const snake = {
+
+  x: game.width / 2,
+  y: game.width / 2,
+  ate: false,
+  cells: null,
+  changedDirection: false,
+  direction: 'up',
+  directionOpposites: { 'up': 'down', 'down': 'up', 'left': 'right', 'right': 'left' },
+  length: null,
+  toRemove: null,
+
+  changeDirection: (newDirection) => {
+
+    if ( ! snake.changedDirection ) {
+
+      if ( ! ( newDirection == snake.directionOpposites[snake.direction] ) ) {
+
+        snake.direction = newDirection;
+        snake.changedDirection = true;
+
+      }
+
+    }
+
+  },
+
+  checkForCollision: function () {
+
+    if ( snake.x < 0 || snake.x > game.width || snake.y < 0 || snake.y > game.width ) { return true; }
+
+    for ( i = 1; i < snake.cells.length; i++ ) {
+
+      if ( snake.x === snake.cells[i].x && snake.y === snake.cells[i].y ) { return true; }
+
+    }
+
+    return false;
+
+  },
+
+  containsCell: function (x, y) {
+
+    for ( cell of snake.cells ) {
+
+      if ( x === cell.x && y === cell.y ) { return true; }
+
+    }
+
+    return false;
+
+  },
+
+  generateSnake: function (length) {
+
+    snake.length = length;
+    snake.cells = [ ];
+
+    for ( i = 0; i < snake.length; i++ ) {
+
+      let cell = new Cell(snake.x, snake.y + i, 'snake');
+
+      snake.cells.push(cell);
+
+    }
+
+  },
+
+  moveSnake: function () {
+
+    switch ( snake.direction ) {
+
+      case 'up': { snake.y--; break; }
+      case 'down': { snake.y++; break; }
+      case 'left': { snake.x--; break; }
+      case 'right': { snake.x++; break; }
+
+    }
+
+    if ( game.wrapActive ) {
+
+      if ( snake.x < 0 ) { snake.x = game.width }
+      if ( snake.x > game.width ) { snake.x = 0 }
+      if ( snake.y < 0 ) { snake.y = game.width }
+      if ( snake.y > game.width ) { snake.y = 0 }
+
+    }
+
+    snake.cells.unshift(new Cell(snake.x, snake.y, 'snake'));
+    snake.ate = ( snake.x === food.x && snake.y === food.y ? true : false );
+
+    if ( ! snake.ate ) {
+
+      snake.toRemove = snake.cells.pop();
+
+    } else {
+
+      food = new Food;
+
+      snake.length++;
+
+      game.score++;
+
+    }
+
+  }
+
+};
+
+/* Init */
+
+snake.generateSnake(4);
+
+food = new Food();
+
+game.generateBoard();
+game.resizeBoard();
+
+window.addEventListener("resize", game.resizeBoard);
+
+game.renderGame();
+
+if ( ! game.started ) {
+
+  listenForInput();
+
 }
