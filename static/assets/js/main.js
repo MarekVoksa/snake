@@ -50,9 +50,27 @@ function Food() {
 
 function listenForInput() {
 
-  window.onkeydown = function () {
+  window.onkeydown = function (e) {
 
-    game.resetAndStartGame();
+    switch ( e.key ) {
+
+      case "PageUp":
+
+        game.changeGameTick(10);
+
+        break;
+
+      case "PageDown":
+
+        game.changeGameTick(-10);
+
+        break;
+
+      default:
+
+        game.resetAndStartGame();
+
+    }
 
   };
 
