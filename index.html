@@ -6,7 +6,7 @@
   <title>Snake</title>
   <meta name="description" content="A snake plus machine learning website">
   <meta name="author" content="Marek Voksa">
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="static/assets/css/main.css">
   <link href="https://fonts.googleapis.com/css?family=Eczar" rel="stylesheet">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
@@ -38,21 +38,21 @@
               <i id="wrap-icon" class="fa fa-plus-square">&nbsp; Wrap edges</i>
             </span>
           </label>
-          <input id="wrap" type="checkbox" onclick="handleGameWrapInput()""/>
+          <input id="wrap" type="checkbox" onclick="handleGameWrapInput()" />
         </form>
       </div>
       <div class="controls">
-        <div class="controls-button controls-up" onclick="game.pressButton(this)">
-          <div class="controls-text">🠉 / W</div>
+        <div class="controls-button controls-up" onclick="UI.pressButton(this)">
+          <div class="controls-text"><i class="fa fa-arrow-up"></i> / W</div>
         </div>
-        <div class="controls-button controls-left" onclick="game.pressButton(this)">
-          <div class="controls-text">🠈 / A</div>
+        <div class="controls-button controls-left" onclick="UI.pressButton(this)">
+          <div class="controls-text"><i class="fa fa-arrow-left"></i> / A</div>
         </div>
-        <div class="controls-button controls-right" onclick="game.pressButton(this)">
-          <div class="controls-text">🠊 / D</div>
+        <div class="controls-button controls-right" onclick="UI.pressButton(this)">
+          <div class="controls-text"><i class="fa fa-arrow-right"></i> / D</div>
         </div>
-        <div class="controls-button controls-down" onclick="game.pressButton(this)">
-          <div class="controls-text">🠋 / S</div>
+        <div class="controls-button controls-down" onclick="UI.pressButton(this)">
+          <div class="controls-text"><i class="fa fa-arrow-down"></i> / S</div>
         </div>
       </div>
     </div>

@@ -109,6 +109,10 @@ main, .left-pane {
   font-size: 1.7em;
 }
 
+.controls-text .fa {
+  color: black;
+}
+
 .controls-button, .button-reset {
   position: relative;
   width: 33.3%;

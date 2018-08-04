@@ -48,7 +48,7 @@ function Food() {
 
 }
 
-function listenForInput() {
+function listenForInputThen(f /* Callback */) {
 
   window.onkeydown = function (e) {
 
@@ -68,7 +68,7 @@ function listenForInput() {
 
       default:
 
-        game.resetAndStartGame();
+        f();
 
     }
 
@@ -76,7 +76,7 @@ function listenForInput() {
 
   $overlay.onclick = function () {
 
-    game.resetAndStartGame();
+    f();
 
   };
 
@@ -111,6 +111,108 @@ const game = {
   width: 20,
   wrapActive: false,
 
+  addGameListeners: () => {
+
+    window.onkeydown = function (e) {
+
+      switch ( e.key ) {
+
+        case "ArrowUp":
+        case "w":
+
+          UI.lightUpButton('up');
+
+          snake.changeDirection('up');
+
+          break;
+
+        case "ArrowDown":
+        case "s":
+
+          UI.lightUpButton('down');
+
+          snake.changeDirection('down');
+
+          break;
+
+        case "ArrowLeft":
+        case "a":
+
+          UI.lightUpButton('left');
+
+          snake.changeDirection('left');
+
+          break;
+
+        case "ArrowRight":
+        case "d":
+
+          UI.lightUpButton('right');
+
+          snake.changeDirection('right');
+
+          break;
+
+        case "PageUp":
+
+          game.changeGameTick(10);
+
+          break;
+
+        case "PageDown":
+
+          game.changeGameTick(-10);
+
+          break;
+
+        case "Escape":
+
+          game.pauseGame();
+
+          break;
+
+      }
+
+    };
+
+    window.onkeyup = function (e) {
+
+      switch (e.key) {
+
+        case "ArrowUp":
+        case "w":
+
+          UI.resetButton('up');
+
+          break;
+
+        case "ArrowDown":
+        case "s":
+
+          UI.resetButton('down');
+
+          break;
+
+        case "ArrowLeft":
+        case "a":
+
+          UI.resetButton('left');
+
+          break;
+
+        case "ArrowRight":
+        case "d":
+
+          UI.resetButton('right');
+
+          break;
+
+      }
+
+    };
+
+  },
+
   changeGameTick: (add) => {
 
     game.tick += add;
@@ -123,6 +225,13 @@ const game = {
       game.mainLoop = setInterval(game.mainFunction, game.tick);
 
     }
+
+  },
+
+  clearGamelisteners: () => {
+
+    window.onkeydown = null;
+    window.onkeyup = null;
 
   },
 
@@ -154,6 +263,20 @@ const game = {
     if ( snake.checkForCollision() ) { game.stopGame(); }
 
     game.renderGame();
+
+  },
+
+  pauseGame: () => {
+
+    game.started = false;
+    game.clearGamelisteners();
+
+    clearInterval(game.mainLoop);
+
+    $overlay.innerHTML = "<h2>Game paused</h2><p>Press any button or click here to unpause.</p>";
+    $overlay.style.display = "flex";
+
+    setTimeout(() => { listenForInputThen(game.unpauseGame) }, 300);
 
   },
 
@@ -210,97 +333,7 @@ const game = {
 
   resetAndStartGame: () => {
 
-    window.onkeydown = function (e) {
-
-      switch ( e.key ) {
-
-        case "ArrowUp":
-        case "w":
-
-          UI.lightUpButton('up');
-
-          snake.changeDirection('up');
-
-          break;
-
-        case "ArrowDown":
-        case "s":
-
-          UI.lightUpButton('down');
-
-          snake.changeDirection('down');
-
-          break;
-
-        case "ArrowLeft":
-        case "a":
-
-          UI.lightUpButton('left');
-
-          snake.changeDirection('left');
-
-          break;
-
-        case "ArrowRight":
-        case "d":
-
-          UI.lightUpButton('right');
-
-          snake.changeDirection('right');
-
-          break;
-
-        case "PageUp":
-
-          game.changeGameTick(10);
-
-          break;
-
-        case "PageDown":
-
-          game.changeGameTick(-10);
-
-          break;
-
-      }
-
-    };
-
-    window.onkeyup = function (e) {
-
-      switch (e.key) {
-
-        case "ArrowUp":
-        case "w":
-
-          UI.resetButton('up');
-
-          break;
-
-        case "ArrowDown":
-        case "s":
-
-          UI.resetButton('down');
-
-          break;
-
-        case "ArrowLeft":
-        case "a":
-
-          UI.resetButton('left');
-
-          break;
-
-        case "ArrowRight":
-        case "d":
-
-          UI.resetButton('right');
-
-          break;
-
-      }
-
-    };
+    game.addGameListeners();
 
     for ( $cell of document.querySelectorAll('.cell') ) {
 
@@ -333,7 +366,18 @@ const game = {
     $overlay.innerHTML = "<h2>GAME OVER</h2><p>Press any button or click here to try again.</p>";
     $overlay.style.display = "flex";
 
-    setTimeout(listenForInput, 300);
+    setTimeout(() => { listenForInputThen(game.resetAndStartGame) }, 300);
+
+  },
+
+  unpauseGame: () => {
+
+    game.addGameListeners();
+    game.started = true;
+    game.mainLoop = setInterval(game.mainFunction, game.tick);
+
+    $overlay.onclick = null;
+    $overlay.style.display = "none";
 
   },
 
@@ -413,7 +457,7 @@ const UI = {
 
     $button.style.background = "white";
 
-  },
+  }
 
 }
 
@@ -543,6 +587,6 @@ game.renderGame();
 
 if ( ! game.started ) {
 
-  listenForInput();
+  listenForInputThen(game.resetAndStartGame);
 
 }
